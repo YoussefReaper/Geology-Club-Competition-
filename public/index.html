@@ -1551,20 +1551,14 @@
         // ── Keyboard shortcuts ────────────────────────
         document.addEventListener("keydown", (e) => {
           // Ignore if typing in an input
-          if (
-            e.target.tagName === "INPUT" ||
-            e.target.tagName === "TEXTAREA"
-          )
+          if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
             return;
           if (currentRole !== "player1" && currentRole !== "player2") return;
 
           // Space = buzz (buzzer mode)
           if (e.code === "Space") {
             e.preventDefault();
-            if (
-              buzzContainer.style.display !== "none" &&
-              !btnBuzz.disabled
-            ) {
+            if (buzzContainer.style.display !== "none" && !btnBuzz.disabled) {
               doBuzz();
             }
           }
