@@ -1,760 +1,1164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GCC — Geology Club Competition</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    /* ── Reset & Variables ─────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg-deep:    #0c1220;
-      --bg-card:    #151f32;
-      --bg-input:   #1a2740;
-      --border:     #263350;
-      --accent:     #4ecda4;
-      --accent2:    #3ab0e6;
-      --amber:      #f0a830;
-      --red:        #e55050;
-      --p1-color:   #3ab0e6;
-      --p2-color:   #b07ce8;
-      --text:       #e0e7ef;
-      --text-dim:   #7a8ba4;
-      --text-faint: #4b5d74;
-      --radius:     12px;
-      --radius-sm:  8px;
-    }
-
-    body {
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg-deep);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-image:
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(78,205,164,0.06) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 80% 100%, rgba(58,176,230,0.04) 0%, transparent 70%);
-    }
-
-    .container {
-      width: 100%;
-      max-width: 620px;
-      padding: 1.5rem;
-    }
-
-    /* ── Branding ──────────────────────────────── */
-    .brand { text-align: center; margin-bottom: 1.75rem; position: relative; }
-    .brand-icon { font-size: 2.5rem; margin-bottom: 0.25rem; }
-    .brand h1 {
-      font-size: 1.65rem; font-weight: 800; letter-spacing: -0.5px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .brand .subtitle {
-      font-size: 0.8rem; color: var(--text-dim); font-weight: 500;
-      letter-spacing: 2.5px; text-transform: uppercase; margin-top: 0.15rem;
-    }
-    .section-title {
-      text-align: center; font-size: 1rem; margin-bottom: 1.25rem;
-      color: var(--text-dim); font-weight: 500;
-    }
-
-    /* ── Leave button ──────────────────────────── */
-    .leave-btn {
-      position: absolute; top: 0; left: 0;
-      background: none; border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text-dim); font-size: 0.75rem; font-family: inherit;
-      padding: 0.3rem 0.6rem; cursor: pointer; transition: all 0.15s;
-    }
-    .leave-btn:hover { color: var(--red); border-color: var(--red); }
-
-    /* ── Scoreboard ────────────────────────────── */
-    .scoreboard {
-      display: grid; grid-template-columns: 1fr auto 1fr;
-      align-items: center; gap: 0.5rem;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 0.4rem;
-    }
-    .score-player { text-align: center; }
-    .score-player .label {
-      font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.35rem;
-    }
-    .score-player.p1 .label { color: var(--p1-color); }
-    .score-player.p2 .label { color: var(--p2-color); }
-    .score-player .points { font-size: 2rem; font-weight: 800; color: var(--text); line-height: 1; }
-    .score-divider { font-size: 1.5rem; color: var(--text-faint); font-weight: 300; }
-    .round-badge {
-      text-align: center; font-size: 0.7rem; color: var(--text-faint);
-      margin-bottom: 1rem; font-weight: 500; letter-spacing: 0.5px;
-    }
-
-    /* ── Admin score controls ──────────────────── */
-    .score-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
-    .score-ctrl-group { display: flex; align-items: center; gap: 0.35rem; justify-content: center; }
-    .score-ctrl-group .sc-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; min-width: 24px; }
-    .score-ctrl-group.p1 .sc-label { color: var(--p1-color); }
-    .score-ctrl-group.p2 .sc-label { color: var(--p2-color); }
-    .sc-btn {
-      width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border);
-      background: var(--bg-input); color: var(--text); font-size: 1rem; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s;
-    }
-    .sc-btn:hover { border-color: var(--accent); background: #1e3344; }
-    .sc-btn.minus:hover { border-color: var(--red); background: #301a1a; }
-
-    /* ── Role Selection ────────────────────────── */
-    #role-select { display: flex; flex-direction: column; gap: 0.65rem; }
-    .role-btn {
-      padding: 1rem 1.25rem; font-size: 1.05rem; font-weight: 600;
-      border: 1.5px solid var(--border); border-radius: var(--radius);
-      background: var(--bg-card); color: var(--text); cursor: pointer;
-      transition: all 0.15s ease; display: flex; align-items: center; gap: 0.75rem;
-      font-family: inherit;
-    }
-    .role-btn:hover { border-color: var(--accent); background: #172a3a; transform: translateY(-1px); }
-    .role-btn .role-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.15rem; flex-shrink: 0;
-    }
-    .role-btn.admin   .role-icon { background: rgba(240,168,48,0.15); }
-    .role-btn.player1 .role-icon { background: rgba(58,176,230,0.15); }
-    .role-btn.player2 .role-icon { background: rgba(176,124,232,0.15); }
-    .role-btn .role-text { display: flex; flex-direction: column; }
-    .role-btn .role-name { font-weight: 700; }
-    .role-btn .role-desc { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; margin-top: 1px; }
-
-    /* ── Panels ────────────────────────────────── */
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* ── Inputs ────────────────────────────────── */
-    .choice-inputs { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1rem; }
-    .choice-inputs input {
-      padding: 0.7rem 0.9rem; font-size: 0.95rem; font-family: inherit;
-      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-      background: var(--bg-input); color: var(--text); outline: none; transition: border-color 0.15s;
-    }
-    .choice-inputs input::placeholder { color: var(--text-faint); }
-    .choice-inputs input:focus { border-color: var(--accent); }
-
-    /* ── Buttons ───────────────────────────────── */
-    .admin-actions { display: flex; gap: 0.6rem; margin-bottom: 0.6rem; }
-    .btn {
-      flex: 1; padding: 0.7rem; font-size: 0.9rem; font-weight: 700; font-family: inherit;
-      border: none; border-radius: var(--radius-sm); cursor: pointer;
-      transition: all 0.15s; letter-spacing: 0.3px;
-    }
-    .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; filter: none; transform: none; }
-    .btn-start { background: linear-gradient(135deg, #34d399, #22a87a); color: #062016; }
-    .btn-reset { background: linear-gradient(135deg, #60a5fa, #3b82f6); color: #fff; }
-    .btn-end   { background: linear-gradient(135deg, #f87171, #e53e3e); color: #fff; }
-
-    /* ── Player view ───────────────────────────── */
-    .waiting-msg {
-      text-align: center; font-size: 1.15rem; color: var(--text-dim); padding: 2.5rem 0;
-    }
-    .waiting-msg .spinner {
-      display: inline-block; width: 20px; height: 20px;
-      border: 2.5px solid var(--border); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 0.5rem;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-    .choice-btn {
-      padding: 1.25rem 0.75rem; font-size: 1rem; font-weight: 600; font-family: inherit;
-      border: 2px solid var(--border); border-radius: var(--radius);
-      background: var(--bg-card); color: var(--text); cursor: pointer;
-      transition: all 0.15s ease; word-break: break-word;
-    }
-    .choice-btn:hover {
-      border-color: var(--accent); background: #172a3a; transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(78,205,164,0.1);
-    }
-    .choice-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    /* ── Result Banner ─────────────────────────── */
-    .result-banner {
-      display: none; text-align: center; padding: 1.25rem; margin-top: 1.25rem;
-      border-radius: var(--radius);
-      background: linear-gradient(135deg, rgba(78,205,164,0.08), rgba(58,176,230,0.06));
-      border: 1.5px solid rgba(78,205,164,0.25);
-    }
-    .result-banner.show { display: block; }
-    .result-banner .winner { font-size: 1.3rem; font-weight: 800; color: var(--accent); margin-bottom: 0.35rem; }
-    .result-banner .answer { font-size: 1rem; color: var(--text-dim); }
-
-    /* ── Session Overlay ───────────────────────── */
-    .session-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(12,18,32,0.92); z-index: 200;
-      align-items: center; justify-content: center; backdrop-filter: blur(8px);
-    }
-    .session-overlay.show { display: flex; }
-    .session-summary {
-      background: var(--bg-card); border: 1.5px solid var(--border);
-      border-radius: 16px; padding: 2.5rem 2rem; text-align: center;
-      max-width: 420px; width: 90%;
-    }
-    .session-summary .trophy { font-size: 3rem; margin-bottom: 0.75rem; }
-    .session-summary h2 {
-      font-size: 1.5rem; font-weight: 800;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 0.35rem;
-    }
-    .session-summary .rounds-info { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem; }
-    .final-scores { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-    .final-score { text-align: center; }
-    .final-score .f-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.35rem; }
-    .final-score.p1 .f-label { color: var(--p1-color); }
-    .final-score.p2 .f-label { color: var(--p2-color); }
-    .final-score .f-points { font-size: 2.75rem; font-weight: 800; line-height: 1; }
-    .final-score.p1 .f-points { color: var(--p1-color); }
-    .final-score.p2 .f-points { color: var(--p2-color); }
-    .final-vs { font-size: 1.5rem; color: var(--text-faint); font-weight: 300; }
-    .session-winner { font-size: 1.1rem; font-weight: 700; color: var(--amber); margin-bottom: 1.25rem; }
-    .btn-new-session {
-      padding: 0.75rem 2rem; font-size: 0.95rem; font-weight: 700; font-family: inherit;
-      border: none; border-radius: var(--radius-sm);
-      background: linear-gradient(135deg, var(--accent), #36b889);
-      color: #062016; cursor: pointer; transition: all 0.15s;
-    }
-    .btn-new-session:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-    /* ── Status Bar ────────────────────────────── */
-    .status-bar {
-      margin-top: 1rem; padding: 0.45rem 0.75rem; border-radius: var(--radius-sm);
-      text-align: center; font-size: 0.78rem;
-      background: var(--bg-card); color: var(--text-faint); border: 1px solid var(--border);
-    }
-    .status-bar .dot {
-      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-      margin-right: 5px; vertical-align: middle;
-    }
-    .dot.waiting  { background: var(--amber); }
-    .dot.active   { background: #34d399; }
-    .dot.answered { background: var(--red); }
-
-    /* ── Toast ─────────────────────────────────── */
-    .toast {
-      position: fixed; top: 1.25rem; left: 50%; transform: translateX(-50%);
-      background: var(--red); color: #fff; padding: 0.7rem 1.5rem;
-      border-radius: var(--radius-sm); font-weight: 600; font-size: 0.9rem;
-      display: none; z-index: 300; box-shadow: 0 4px 24px rgba(229,80,80,0.3);
-    }
-    .toast.show { display: block; }
-
-    /* ── Connection indicator ──────────────────── */
-    .conn-dot {
-      position: fixed; bottom: 0.75rem; right: 0.75rem;
-      width: 8px; height: 8px; border-radius: 50%; background: #34d399;
-      box-shadow: 0 0 6px rgba(52,211,153,0.5); transition: background 0.3s;
-    }
-    .conn-dot.offline { background: var(--red); box-shadow: 0 0 6px rgba(229,80,80,0.5); }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Session Summary Overlay -->
-  <div class="session-overlay" id="session-overlay">
-    <div class="session-summary">
-      <div class="trophy">🏆</div>
-      <h2>Session Complete</h2>
-      <div class="rounds-info" id="summary-rounds"></div>
-      <div class="final-scores">
-        <div class="final-score p1">
-          <div class="f-label">Player 1</div>
-          <div class="f-points" id="summary-p1">0</div>
-        </div>
-        <div class="final-vs">—</div>
-        <div class="final-score p2">
-          <div class="f-label">Player 2</div>
-          <div class="f-points" id="summary-p2">0</div>
-        </div>
-      </div>
-      <div class="session-winner" id="summary-winner"></div>
-      <button class="btn-new-session" id="btn-new-session">New Session</button>
-    </div>
-  </div>
-
-  <!-- ═══ Role Selection ═══ -->
-  <div id="role-select-panel" class="panel active">
-    <div class="brand">
-      <div class="brand-icon">🪨</div>
-      <h1>Geology Club Competition</h1>
-      <div class="subtitle">GCC Buzzer System</div>
-    </div>
-    <p class="section-title">Choose your role to join</p>
-    <div id="role-select">
-      <button class="role-btn admin" data-role="admin">
-        <span class="role-icon">🛡️</span>
-        <span class="role-text">
-          <span class="role-name">Admin</span>
-          <span class="role-desc">Host &amp; control the competition</span>
-        </span>
-      </button>
-      <button class="role-btn player1" data-role="player1">
-        <span class="role-icon">🔷</span>
-        <span class="role-text">
-          <span class="role-name">Player 1</span>
-          <span class="role-desc">Compete as the blue team</span>
-        </span>
-      </button>
-      <button class="role-btn player2" data-role="player2">
-        <span class="role-icon">🔮</span>
-        <span class="role-text">
-          <span class="role-name">Player 2</span>
-          <span class="role-desc">Compete as the purple team</span>
-        </span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ═══ Admin Panel ═══ -->
-  <div id="admin-panel" class="panel">
-    <div class="brand">
-      <button class="leave-btn" id="btn-leave-admin">← Leave</button>
-      <h1>🛡️ GCC — Admin Panel</h1>
-    </div>
-
-    <div class="scoreboard">
-      <div class="score-player p1">
-        <div class="label">Player 1</div>
-        <div class="points" id="admin-score-p1">0</div>
-      </div>
-      <div class="score-divider">:</div>
-      <div class="score-player p2">
-        <div class="label">Player 2</div>
-        <div class="points" id="admin-score-p2">0</div>
-      </div>
-    </div>
-    <div class="round-badge" id="admin-round-badge">Round 0</div>
-
-    <div class="score-controls">
-      <div class="score-ctrl-group p1">
-        <span class="sc-label">P1</span>
-        <button class="sc-btn" data-player="player1" data-action="add">+</button>
-        <button class="sc-btn minus" data-player="player1" data-action="sub">−</button>
-      </div>
-      <div class="score-ctrl-group p2">
-        <span class="sc-label">P2</span>
-        <button class="sc-btn" data-player="player2" data-action="add">+</button>
-        <button class="sc-btn minus" data-player="player2" data-action="sub">−</button>
-      </div>
-    </div>
-
-    <div class="choice-inputs" id="choice-inputs">
-      <input type="text" placeholder="Choice A" maxlength="80" />
-      <input type="text" placeholder="Choice B" maxlength="80" />
-      <input type="text" placeholder="Choice C" maxlength="80" />
-      <input type="text" placeholder="Choice D" maxlength="80" />
-      <input type="text" placeholder="Choice E (optional)" maxlength="80" />
-    </div>
-
-    <div class="admin-actions">
-      <button class="btn btn-start" id="btn-start">▶ Start Round</button>
-      <button class="btn btn-reset" id="btn-reset">↺ Reset Round</button>
-    </div>
-    <div class="admin-actions" style="margin-top:0.4rem">
-      <button class="btn btn-end" id="btn-end">■ End Session</button>
-    </div>
-
-    <div class="result-banner" id="admin-result">
-      <div class="winner" id="admin-result-winner"></div>
-      <div class="answer" id="admin-result-answer"></div>
-    </div>
-    <div class="status-bar" id="admin-status"><span class="dot waiting"></span> Waiting</div>
-  </div>
-
-  <!-- ═══ Player Panel ═══ -->
-  <div id="player-panel" class="panel">
-    <div class="brand">
-      <button class="leave-btn" id="btn-leave-player">← Leave</button>
-      <h1 id="player-title">Player</h1>
-      <div class="subtitle">Geology Club Competition</div>
-    </div>
-
-    <div class="scoreboard">
-      <div class="score-player p1">
-        <div class="label">Player 1</div>
-        <div class="points" id="player-score-p1">0</div>
-      </div>
-      <div class="score-divider">:</div>
-      <div class="score-player p2">
-        <div class="label">Player 2</div>
-        <div class="points" id="player-score-p2">0</div>
-      </div>
-    </div>
-    <div class="round-badge" id="player-round-badge">Round 0</div>
-
-    <div class="waiting-msg" id="waiting-msg"><span class="spinner"></span> Waiting for Host…</div>
-    <div class="choices-grid" id="choices-grid" style="display:none"></div>
-
-    <div class="result-banner" id="player-result">
-      <div class="winner" id="player-result-winner"></div>
-      <div class="answer" id="player-result-answer"></div>
-    </div>
-    <div class="status-bar" id="player-status"><span class="dot waiting"></span> Waiting</div>
-  </div>
-</div>
-
-<!-- Connection indicator -->
-<div class="conn-dot" id="conn-dot" title="Server connection"></div>
-
-<script>
-(() => {
-  // ── Config ────────────────────────────────────
-  const POLL_MS = 350;
-
-  // ── State ─────────────────────────────────────
-  let token        = sessionStorage.getItem('gcc_token');
-  let currentRole  = sessionStorage.getItem('gcc_role');
-  let pollTimer    = null;
-  let prevPhase    = null;
-  let hasSubmitted = false;
-  let sessionOverlayDismissed = false;
-
-  // ── DOM refs ──────────────────────────────────
-  const $ = id => document.getElementById(id);
-
-  const adminScoreP1  = $('admin-score-p1'),  adminScoreP2  = $('admin-score-p2');
-  const playerScoreP1 = $('player-score-p1'), playerScoreP2 = $('player-score-p2');
-  const adminRound    = $('admin-round-badge'), playerRound = $('player-round-badge');
-  const adminStatus   = $('admin-status'),  playerStatus  = $('player-status');
-  const adminResult   = $('admin-result'),  adminWinner   = $('admin-result-winner'), adminAnswer = $('admin-result-answer');
-  const playerResult  = $('player-result'), playerWinner  = $('player-result-winner'), playerAnswer = $('player-result-answer');
-  const playerTitle   = $('player-title');
-  const waitingMsg    = $('waiting-msg'),   choicesGrid   = $('choices-grid');
-  const toast         = $('toast'),         connDot       = $('conn-dot');
-  const sessionOverlay = $('session-overlay');
-  const summaryP1     = $('summary-p1'),    summaryP2     = $('summary-p2');
-  const summaryRounds = $('summary-rounds'), summaryWinner = $('summary-winner');
-  const choiceInputs  = document.querySelectorAll('#choice-inputs input');
-
-  // ── API helper ────────────────────────────────
-  async function post(path, data = {}) {
-    const res = await fetch(`/api${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, token })
-    });
-    return res.json();
-  }
-
-  // ── UI helpers ────────────────────────────────
-  function showPanel(id) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    $(id).classList.add('active');
-  }
-
-  function setStatus(el, phase) {
-    const labels = { waiting: 'Waiting', active: 'Round Active', answered: 'Round Over' };
-    el.innerHTML = `<span class="dot ${phase}"></span> ${labels[phase] || phase}`;
-  }
-
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-
-  function updateScores(scores, round) {
-    if (scores) {
-      adminScoreP1.textContent  = scores.player1;
-      adminScoreP2.textContent  = scores.player2;
-      playerScoreP1.textContent = scores.player1;
-      playerScoreP2.textContent = scores.player2;
-    }
-    if (round !== undefined) {
-      const txt = `Round ${round}`;
-      adminRound.textContent  = txt;
-      playerRound.textContent = txt;
-    }
-  }
-
-  // ── Polling ───────────────────────────────────
-  function startPolling() {
-    stopPolling();
-    poll();
-    pollTimer = setInterval(poll, POLL_MS);
-  }
-
-  function stopPolling() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  }
-
-  async function poll() {
-    if (!token) return;
-    try {
-      const res = await fetch(`/api/state?token=${encodeURIComponent(token)}`);
-      const state = await res.json();
-      connDot.classList.remove('offline');
-
-      // Token invalid (server restarted)
-      if (!state.role) {
-        leaveRole(true);
-        showToast('Session lost — please rejoin.');
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GCC — Geology Club Competition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── Reset & Variables ─────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
-      render(state);
-    } catch (e) {
-      connDot.classList.add('offline');
-    }
-  }
-
-  // ── Render ────────────────────────────────────
-  function render(state) {
-    updateScores(state.scores, state.round);
-
-    if (currentRole === 'admin') {
-      renderAdmin(state);
-    } else {
-      renderPlayer(state);
-    }
-
-    // Session overlay
-    if (state.sessionEndData && !sessionOverlayDismissed) {
-      showSessionSummary(state.sessionEndData);
-    } else if (!state.sessionEndData) {
-      sessionOverlayDismissed = false;
-      sessionOverlay.classList.remove('show');
-    }
-
-    prevPhase = state.phase;
-  }
-
-  function renderAdmin(state) {
-    setStatus(adminStatus, state.phase);
-    if (state.phase === 'answered' && state.winner) {
-      adminWinner.textContent = `🏆 ${state.winner} buzzed in first!`;
-      adminAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
-      adminResult.classList.add('show');
-    } else {
-      adminResult.classList.remove('show');
-    }
-  }
-
-  function renderPlayer(state) {
-    setStatus(playerStatus, state.phase);
-
-    // Only act on phase transitions
-    if (state.phase === prevPhase) return;
-
-    switch (state.phase) {
-      case 'waiting':
-        waitingMsg.style.display = 'block';
-        choicesGrid.style.display = 'none';
-        choicesGrid.innerHTML = '';
-        playerResult.classList.remove('show');
-        hasSubmitted = false;
-        break;
-
-      case 'active':
-        hasSubmitted = false;
-        renderChoices(state.choices);
-        playerResult.classList.remove('show');
-        break;
-
-      case 'answered':
-        disableChoiceButtons();
-        playerWinner.textContent = `🏆 ${state.winner} buzzed in first!`;
-        playerAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
-        playerResult.classList.add('show');
-        break;
-    }
-  }
-
-  function renderChoices(choices) {
-    waitingMsg.style.display = 'none';
-    choicesGrid.style.display = 'grid';
-    choicesGrid.innerHTML = '';
-
-    choices.forEach(choice => {
-      const btn = document.createElement('button');
-      btn.className = 'choice-btn';
-      btn.textContent = choice;
-      btn.addEventListener('click', async () => {
-        if (hasSubmitted) return;
-        hasSubmitted = true;
-        disableChoiceButtons();
-        await post('/submit-answer', { answer: choice });
-      });
-      choicesGrid.appendChild(btn);
-    });
-  }
-
-  function disableChoiceButtons() {
-    document.querySelectorAll('.choice-btn').forEach(b => (b.disabled = true));
-  }
-
-  function showSessionSummary(data) {
-    summaryP1.textContent     = data.finalScores.player1;
-    summaryP2.textContent     = data.finalScores.player2;
-    summaryRounds.textContent = `${data.totalRounds} round${data.totalRounds !== 1 ? 's' : ''} played`;
-
-    if (data.finalScores.player1 > data.finalScores.player2)
-      summaryWinner.textContent = '🔷 Player 1 Wins!';
-    else if (data.finalScores.player2 > data.finalScores.player1)
-      summaryWinner.textContent = '🔮 Player 2 Wins!';
-    else
-      summaryWinner.textContent = "It's a Tie!";
-
-    sessionOverlay.classList.add('show');
-  }
-
-  // ── Role selection ────────────────────────────
-  document.querySelectorAll('.role-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const role = btn.dataset.role;
-      try {
-        const res = await fetch('/api/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role })
-        });
-        const data = await res.json();
-
-        if (res.status === 409) {
-          showToast(data.error);
-          return;
-        }
-        if (!res.ok) {
-          showToast(data.error || 'Error');
-          return;
-        }
-
-        token = data.token;
-        currentRole = data.role;
-        prevPhase = null;
-        sessionStorage.setItem('gcc_token', token);
-        sessionStorage.setItem('gcc_role', currentRole);
-
-        if (currentRole === 'admin') {
-          showPanel('admin-panel');
-        } else {
-          playerTitle.textContent = currentRole === 'player1' ? '🔷 Player 1' : '🔮 Player 2';
-          showPanel('player-panel');
-        }
-
-        startPolling();
-      } catch (e) {
-        showToast('Connection error. Try again.');
+      :root {
+        --bg-deep: #0c1220;
+        --bg-card: #151f32;
+        --bg-input: #1a2740;
+        --border: #263350;
+        --accent: #4ecda4;
+        --accent2: #3ab0e6;
+        --amber: #f0a830;
+        --red: #e55050;
+        --p1-color: #3ab0e6;
+        --p2-color: #b07ce8;
+        --text: #e0e7ef;
+        --text-dim: #7a8ba4;
+        --text-faint: #4b5d74;
+        --radius: 12px;
+        --radius-sm: 8px;
       }
-    });
-  });
 
-  // ── Leave / release role ──────────────────────
-  async function leaveRole(skipPost) {
-    stopPolling();
-    if (token && !skipPost) {
-      try { await post('/release-role'); } catch (e) {}
-    }
-    token = null;
-    currentRole = null;
-    prevPhase = null;
-    hasSubmitted = false;
-    sessionOverlayDismissed = false;
-    sessionStorage.removeItem('gcc_token');
-    sessionStorage.removeItem('gcc_role');
-    adminResult.classList.remove('show');
-    playerResult.classList.remove('show');
-    sessionOverlay.classList.remove('show');
-    waitingMsg.style.display = 'block';
-    choicesGrid.style.display = 'none';
-    choicesGrid.innerHTML = '';
-    showPanel('role-select-panel');
-  }
+      body {
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        background: var(--bg-deep);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-image:
+          radial-gradient(
+            ellipse 80% 60% at 50% 0%,
+            rgba(78, 205, 164, 0.06) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 50% at 80% 100%,
+            rgba(58, 176, 230, 0.04) 0%,
+            transparent 70%
+          );
+      }
 
-  $('btn-leave-admin').addEventListener('click', () => leaveRole());
-  $('btn-leave-player').addEventListener('click', () => leaveRole());
+      .container {
+        width: 100%;
+        max-width: 620px;
+        padding: 1.5rem;
+      }
 
-  // Release role on page close
-  window.addEventListener('beforeunload', () => {
-    if (token) {
-      navigator.sendBeacon(
-        '/api/release-role',
-        new Blob([JSON.stringify({ token })], { type: 'application/json' })
-      );
-    }
-  });
+      /* ── Branding ──────────────────────────────── */
+      .brand {
+        text-align: center;
+        margin-bottom: 1.75rem;
+        position: relative;
+      }
+      .brand-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.25rem;
+      }
+      .brand h1 {
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .brand .subtitle {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        font-weight: 500;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        margin-top: 0.15rem;
+      }
+      .section-title {
+        text-align: center;
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+        color: var(--text-dim);
+        font-weight: 500;
+      }
 
-  // ── Admin actions ─────────────────────────────
-  $('btn-start').addEventListener('click', async () => {
-    const choices = Array.from(choiceInputs).map(i => i.value.trim()).filter(Boolean);
-    if (choices.length < 2) { showToast('Enter at least 2 choices.'); return; }
-    await post('/start-round', { choices });
-  });
+      /* ── Leave button ──────────────────────────── */
+      .leave-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-dim);
+        font-size: 0.75rem;
+        font-family: inherit;
+        padding: 0.3rem 0.6rem;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .leave-btn:hover {
+        color: var(--red);
+        border-color: var(--red);
+      }
 
-  $('btn-reset').addEventListener('click', async () => {
-    await post('/reset-round');
-  });
+      /* ── Scoreboard ────────────────────────────── */
+      .scoreboard {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.4rem;
+      }
+      .score-player {
+        text-align: center;
+      }
+      .score-player .label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 0.35rem;
+      }
+      .score-player.p1 .label {
+        color: var(--p1-color);
+      }
+      .score-player.p2 .label {
+        color: var(--p2-color);
+      }
+      .score-player .points {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1;
+      }
+      .score-divider {
+        font-size: 1.5rem;
+        color: var(--text-faint);
+        font-weight: 300;
+      }
+      .round-badge {
+        text-align: center;
+        font-size: 0.7rem;
+        color: var(--text-faint);
+        margin-bottom: 1rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
 
-  $('btn-end').addEventListener('click', async () => {
-    if (confirm('End the entire session and reset all scores?')) {
-      await post('/end-session');
-    }
-  });
+      /* ── Admin score controls ──────────────────── */
+      .score-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .score-ctrl-group {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        justify-content: center;
+      }
+      .score-ctrl-group .sc-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        min-width: 24px;
+      }
+      .score-ctrl-group.p1 .sc-label {
+        color: var(--p1-color);
+      }
+      .score-ctrl-group.p2 .sc-label {
+        color: var(--p2-color);
+      }
+      .sc-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.12s;
+      }
+      .sc-btn:hover {
+        border-color: var(--accent);
+        background: #1e3344;
+      }
+      .sc-btn.minus:hover {
+        border-color: var(--red);
+        background: #301a1a;
+      }
 
-  // Score controls
-  document.querySelectorAll('.sc-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const player = btn.dataset.player;
-      const action = btn.dataset.action;
-      if (action === 'add') await post('/award-point', { player });
-      else await post('/deduct-point', { player });
-    });
-  });
+      /* ── Role Selection ────────────────────────── */
+      #role-select {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .role-btn {
+        padding: 1rem 1.25rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-card);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-family: inherit;
+      }
+      .role-btn:hover {
+        border-color: var(--accent);
+        background: #172a3a;
+        transform: translateY(-1px);
+      }
+      .role-btn .role-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+      }
+      .role-btn.admin .role-icon {
+        background: rgba(240, 168, 48, 0.15);
+      }
+      .role-btn.player1 .role-icon {
+        background: rgba(58, 176, 230, 0.15);
+      }
+      .role-btn.player2 .role-icon {
+        background: rgba(176, 124, 232, 0.15);
+      }
+      .role-btn .role-text {
+        display: flex;
+        flex-direction: column;
+      }
+      .role-btn .role-name {
+        font-weight: 700;
+      }
+      .role-btn .role-desc {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 400;
+        margin-top: 1px;
+      }
 
-  // Dismiss session overlay
-  $('btn-new-session').addEventListener('click', () => {
-    sessionOverlayDismissed = true;
-    sessionOverlay.classList.remove('show');
-  });
+      /* ── Panels ────────────────────────────────── */
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
 
-  // ── Init: restore session on page refresh ─────
-  async function init() {
-    if (token && currentRole) {
-      try {
-        const res = await fetch(`/api/state?token=${encodeURIComponent(token)}`);
-        const state = await res.json();
+      /* ── Inputs ────────────────────────────────── */
+      .choice-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        margin-bottom: 1rem;
+      }
+      .choice-inputs input {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.95rem;
+        font-family: inherit;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--bg-input);
+        color: var(--text);
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .choice-inputs input::placeholder {
+        color: var(--text-faint);
+      }
+      .choice-inputs input:focus {
+        border-color: var(--accent);
+      }
 
-        if (state.role === currentRole) {
-          if (currentRole === 'admin') {
-            showPanel('admin-panel');
-          } else {
-            playerTitle.textContent = currentRole === 'player1' ? '🔷 Player 1' : '🔮 Player 2';
-            showPanel('player-panel');
+      /* ── Buttons ───────────────────────────────── */
+      .admin-actions {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 0.6rem;
+      }
+      .btn {
+        flex: 1;
+        padding: 0.7rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        font-family: inherit;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.15s;
+        letter-spacing: 0.3px;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        filter: none;
+        transform: none;
+      }
+      .btn-start {
+        background: linear-gradient(135deg, #34d399, #22a87a);
+        color: #062016;
+      }
+      .btn-reset {
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        color: #fff;
+      }
+      .btn-end {
+        background: linear-gradient(135deg, #f87171, #e53e3e);
+        color: #fff;
+      }
+
+      /* ── Player view ───────────────────────────── */
+      .waiting-msg {
+        text-align: center;
+        font-size: 1.15rem;
+        color: var(--text-dim);
+        padding: 2.5rem 0;
+      }
+      .waiting-msg .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2.5px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .choices-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+      }
+      .choice-btn {
+        padding: 1.25rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-card);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        word-break: break-word;
+      }
+      .choice-btn:hover {
+        border-color: var(--accent);
+        background: #172a3a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(78, 205, 164, 0.1);
+      }
+      .choice-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* ── Result Banner ─────────────────────────── */
+      .result-banner {
+        display: none;
+        text-align: center;
+        padding: 1.25rem;
+        margin-top: 1.25rem;
+        border-radius: var(--radius);
+        background: linear-gradient(
+          135deg,
+          rgba(78, 205, 164, 0.08),
+          rgba(58, 176, 230, 0.06)
+        );
+        border: 1.5px solid rgba(78, 205, 164, 0.25);
+      }
+      .result-banner.show {
+        display: block;
+      }
+      .result-banner .winner {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--accent);
+        margin-bottom: 0.35rem;
+      }
+      .result-banner .answer {
+        font-size: 1rem;
+        color: var(--text-dim);
+      }
+
+      /* ── Session Overlay ───────────────────────── */
+      .session-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(12, 18, 32, 0.92);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+      }
+      .session-overlay.show {
+        display: flex;
+      }
+      .session-summary {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        max-width: 420px;
+        width: 90%;
+      }
+      .session-summary .trophy {
+        font-size: 3rem;
+        margin-bottom: 0.75rem;
+      }
+      .session-summary h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.35rem;
+      }
+      .session-summary .rounds-info {
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        margin-bottom: 1.5rem;
+      }
+      .final-scores {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .final-score {
+        text-align: center;
+      }
+      .final-score .f-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 0.35rem;
+      }
+      .final-score.p1 .f-label {
+        color: var(--p1-color);
+      }
+      .final-score.p2 .f-label {
+        color: var(--p2-color);
+      }
+      .final-score .f-points {
+        font-size: 2.75rem;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .final-score.p1 .f-points {
+        color: var(--p1-color);
+      }
+      .final-score.p2 .f-points {
+        color: var(--p2-color);
+      }
+      .final-vs {
+        font-size: 1.5rem;
+        color: var(--text-faint);
+        font-weight: 300;
+      }
+      .session-winner {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--amber);
+        margin-bottom: 1.25rem;
+      }
+      .btn-new-session {
+        padding: 0.75rem 2rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        font-family: inherit;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--accent), #36b889);
+        color: #062016;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .btn-new-session:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+
+      /* ── Status Bar ────────────────────────────── */
+      .status-bar {
+        margin-top: 1rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        font-size: 0.78rem;
+        background: var(--bg-card);
+        color: var(--text-faint);
+        border: 1px solid var(--border);
+      }
+      .status-bar .dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+      }
+      .dot.waiting {
+        background: var(--amber);
+      }
+      .dot.active {
+        background: #34d399;
+      }
+      .dot.answered {
+        background: var(--red);
+      }
+
+      /* ── Toast ─────────────────────────────────── */
+      .toast {
+        position: fixed;
+        top: 1.25rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--red);
+        color: #fff;
+        padding: 0.7rem 1.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: none;
+        z-index: 300;
+        box-shadow: 0 4px 24px rgba(229, 80, 80, 0.3);
+      }
+      .toast.show {
+        display: block;
+      }
+
+      /* ── Connection indicator ──────────────────── */
+      .conn-dot {
+        position: fixed;
+        bottom: 0.75rem;
+        right: 0.75rem;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+        transition: background 0.3s;
+      }
+      .conn-dot.offline {
+        background: var(--red);
+        box-shadow: 0 0 6px rgba(229, 80, 80, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+
+      <!-- Session Summary Overlay -->
+      <div class="session-overlay" id="session-overlay">
+        <div class="session-summary">
+          <div class="trophy">🏆</div>
+          <h2>Session Complete</h2>
+          <div class="rounds-info" id="summary-rounds"></div>
+          <div class="final-scores">
+            <div class="final-score p1">
+              <div class="f-label">Player 1</div>
+              <div class="f-points" id="summary-p1">0</div>
+            </div>
+            <div class="final-vs">—</div>
+            <div class="final-score p2">
+              <div class="f-label">Player 2</div>
+              <div class="f-points" id="summary-p2">0</div>
+            </div>
+          </div>
+          <div class="session-winner" id="summary-winner"></div>
+          <button class="btn-new-session" id="btn-new-session">
+            New Session
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ Role Selection ═══ -->
+      <div id="role-select-panel" class="panel active">
+        <div class="brand">
+          <div class="brand-icon">🪨</div>
+          <h1>Geology Club Competition</h1>
+          <div class="subtitle">GCC Buzzer System</div>
+        </div>
+        <p class="section-title">Choose your role to join</p>
+        <div id="role-select">
+          <button class="role-btn admin" data-role="admin">
+            <span class="role-icon">🛡️</span>
+            <span class="role-text">
+              <span class="role-name">Admin</span>
+              <span class="role-desc">Host &amp; control the competition</span>
+            </span>
+          </button>
+          <button class="role-btn player1" data-role="player1">
+            <span class="role-icon">🔷</span>
+            <span class="role-text">
+              <span class="role-name">Player 1</span>
+              <span class="role-desc">Compete as the blue team</span>
+            </span>
+          </button>
+          <button class="role-btn player2" data-role="player2">
+            <span class="role-icon">🔮</span>
+            <span class="role-text">
+              <span class="role-name">Player 2</span>
+              <span class="role-desc">Compete as the purple team</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ Admin Panel ═══ -->
+      <div id="admin-panel" class="panel">
+        <div class="brand">
+          <button class="leave-btn" id="btn-leave-admin">← Leave</button>
+          <h1>🛡️ GCC — Admin Panel</h1>
+        </div>
+
+        <div class="scoreboard">
+          <div class="score-player p1">
+            <div class="label">Player 1</div>
+            <div class="points" id="admin-score-p1">0</div>
+          </div>
+          <div class="score-divider">:</div>
+          <div class="score-player p2">
+            <div class="label">Player 2</div>
+            <div class="points" id="admin-score-p2">0</div>
+          </div>
+        </div>
+        <div class="round-badge" id="admin-round-badge">Round 0</div>
+
+        <div class="score-controls">
+          <div class="score-ctrl-group p1">
+            <span class="sc-label">P1</span>
+            <button class="sc-btn" data-player="player1" data-action="add">
+              +
+            </button>
+            <button
+              class="sc-btn minus"
+              data-player="player1"
+              data-action="sub"
+            >
+              −
+            </button>
+          </div>
+          <div class="score-ctrl-group p2">
+            <span class="sc-label">P2</span>
+            <button class="sc-btn" data-player="player2" data-action="add">
+              +
+            </button>
+            <button
+              class="sc-btn minus"
+              data-player="player2"
+              data-action="sub"
+            >
+              −
+            </button>
+          </div>
+        </div>
+
+        <div class="choice-inputs" id="choice-inputs">
+          <input type="text" placeholder="Choice A" maxlength="80" />
+          <input type="text" placeholder="Choice B" maxlength="80" />
+          <input type="text" placeholder="Choice C" maxlength="80" />
+          <input type="text" placeholder="Choice D" maxlength="80" />
+          <input type="text" placeholder="Choice E (optional)" maxlength="80" />
+        </div>
+
+        <div class="admin-actions">
+          <button class="btn btn-start" id="btn-start">▶ Start Round</button>
+          <button class="btn btn-reset" id="btn-reset">↺ Reset Round</button>
+        </div>
+        <div class="admin-actions" style="margin-top: 0.4rem">
+          <button class="btn btn-end" id="btn-end">■ End Session</button>
+        </div>
+
+        <div class="result-banner" id="admin-result">
+          <div class="winner" id="admin-result-winner"></div>
+          <div class="answer" id="admin-result-answer"></div>
+        </div>
+        <div class="status-bar" id="admin-status">
+          <span class="dot waiting"></span> Waiting
+        </div>
+      </div>
+
+      <!-- ═══ Player Panel ═══ -->
+      <div id="player-panel" class="panel">
+        <div class="brand">
+          <button class="leave-btn" id="btn-leave-player">← Leave</button>
+          <h1 id="player-title">Player</h1>
+          <div class="subtitle">Geology Club Competition</div>
+        </div>
+
+        <div class="scoreboard">
+          <div class="score-player p1">
+            <div class="label">Player 1</div>
+            <div class="points" id="player-score-p1">0</div>
+          </div>
+          <div class="score-divider">:</div>
+          <div class="score-player p2">
+            <div class="label">Player 2</div>
+            <div class="points" id="player-score-p2">0</div>
+          </div>
+        </div>
+        <div class="round-badge" id="player-round-badge">Round 0</div>
+
+        <div class="waiting-msg" id="waiting-msg">
+          <span class="spinner"></span> Waiting for Host…
+        </div>
+        <div class="choices-grid" id="choices-grid" style="display: none"></div>
+
+        <div class="result-banner" id="player-result">
+          <div class="winner" id="player-result-winner"></div>
+          <div class="answer" id="player-result-answer"></div>
+        </div>
+        <div class="status-bar" id="player-status">
+          <span class="dot waiting"></span> Waiting
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection indicator -->
+    <div class="conn-dot" id="conn-dot" title="Server connection"></div>
+
+    <script>
+      (() => {
+        // ── Config ────────────────────────────────────
+        const POLL_MS = 350;
+
+        // ── State ─────────────────────────────────────
+        let token = sessionStorage.getItem("gcc_token");
+        let currentRole = sessionStorage.getItem("gcc_role");
+        let pollTimer = null;
+        let prevPhase = null;
+        let hasSubmitted = false;
+        let sessionOverlayDismissed = false;
+
+        // ── DOM refs ──────────────────────────────────
+        const $ = (id) => document.getElementById(id);
+
+        const adminScoreP1 = $("admin-score-p1"),
+          adminScoreP2 = $("admin-score-p2");
+        const playerScoreP1 = $("player-score-p1"),
+          playerScoreP2 = $("player-score-p2");
+        const adminRound = $("admin-round-badge"),
+          playerRound = $("player-round-badge");
+        const adminStatus = $("admin-status"),
+          playerStatus = $("player-status");
+        const adminResult = $("admin-result"),
+          adminWinner = $("admin-result-winner"),
+          adminAnswer = $("admin-result-answer");
+        const playerResult = $("player-result"),
+          playerWinner = $("player-result-winner"),
+          playerAnswer = $("player-result-answer");
+        const playerTitle = $("player-title");
+        const waitingMsg = $("waiting-msg"),
+          choicesGrid = $("choices-grid");
+        const toast = $("toast"),
+          connDot = $("conn-dot");
+        const sessionOverlay = $("session-overlay");
+        const summaryP1 = $("summary-p1"),
+          summaryP2 = $("summary-p2");
+        const summaryRounds = $("summary-rounds"),
+          summaryWinner = $("summary-winner");
+        const choiceInputs = document.querySelectorAll("#choice-inputs input");
+
+        // ── API helper ────────────────────────────────
+        async function post(path, data = {}) {
+          const res = await fetch(`/api${path}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, token }),
+          });
+          return res.json();
+        }
+
+        // ── UI helpers ────────────────────────────────
+        function showPanel(id) {
+          document
+            .querySelectorAll(".panel")
+            .forEach((p) => p.classList.remove("active"));
+          $(id).classList.add("active");
+        }
+
+        function setStatus(el, phase) {
+          const labels = {
+            waiting: "Waiting",
+            active: "Round Active",
+            answered: "Round Over",
+          };
+          el.innerHTML = `<span class="dot ${phase}"></span> ${labels[phase] || phase}`;
+        }
+
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 3000);
+        }
+
+        function updateScores(scores, round) {
+          if (scores) {
+            adminScoreP1.textContent = scores.player1;
+            adminScoreP2.textContent = scores.player2;
+            playerScoreP1.textContent = scores.player1;
+            playerScoreP2.textContent = scores.player2;
           }
-          startPolling();
-          return;
+          if (round !== undefined) {
+            const txt = `Round ${round}`;
+            adminRound.textContent = txt;
+            playerRound.textContent = txt;
+          }
         }
-      } catch (e) {}
 
-      // Token invalid
-      sessionStorage.removeItem('gcc_token');
-      sessionStorage.removeItem('gcc_role');
-      token = null;
-      currentRole = null;
-    }
-    showPanel('role-select-panel');
-  }
+        // ── Polling ───────────────────────────────────
+        function startPolling() {
+          stopPolling();
+          poll();
+          pollTimer = setInterval(poll, POLL_MS);
+        }
 
-  init();
-})();
-</script>
-</body>
+        function stopPolling() {
+          if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+          }
+        }
+
+        async function poll() {
+          if (!token) return;
+          try {
+            const res = await fetch(
+              `/api/state?token=${encodeURIComponent(token)}`,
+            );
+            const state = await res.json();
+            connDot.classList.remove("offline");
+
+            // Token invalid (server restarted)
+            if (!state.role) {
+              leaveRole(true);
+              showToast("Session lost — please rejoin.");
+              return;
+            }
+
+            render(state);
+          } catch (e) {
+            connDot.classList.add("offline");
+          }
+        }
+
+        // ── Render ────────────────────────────────────
+        function render(state) {
+          updateScores(state.scores, state.round);
+
+          if (currentRole === "admin") {
+            renderAdmin(state);
+          } else {
+            renderPlayer(state);
+          }
+
+          // Session overlay
+          if (state.sessionEndData && !sessionOverlayDismissed) {
+            showSessionSummary(state.sessionEndData);
+          } else if (!state.sessionEndData) {
+            sessionOverlayDismissed = false;
+            sessionOverlay.classList.remove("show");
+          }
+
+          prevPhase = state.phase;
+        }
+
+        function renderAdmin(state) {
+          setStatus(adminStatus, state.phase);
+          if (state.phase === "answered" && state.winner) {
+            adminWinner.textContent = `🏆 ${state.winner} buzzed in first!`;
+            adminAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
+            adminResult.classList.add("show");
+          } else {
+            adminResult.classList.remove("show");
+          }
+        }
+
+        function renderPlayer(state) {
+          setStatus(playerStatus, state.phase);
+
+          // Only act on phase transitions
+          if (state.phase === prevPhase) return;
+
+          switch (state.phase) {
+            case "waiting":
+              waitingMsg.style.display = "block";
+              choicesGrid.style.display = "none";
+              choicesGrid.innerHTML = "";
+              playerResult.classList.remove("show");
+              hasSubmitted = false;
+              break;
+
+            case "active":
+              hasSubmitted = false;
+              renderChoices(state.choices);
+              playerResult.classList.remove("show");
+              break;
+
+            case "answered":
+              disableChoiceButtons();
+              playerWinner.textContent = `🏆 ${state.winner} buzzed in first!`;
+              playerAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
+              playerResult.classList.add("show");
+              break;
+          }
+        }
+
+        function renderChoices(choices) {
+          waitingMsg.style.display = "none";
+          choicesGrid.style.display = "grid";
+          choicesGrid.innerHTML = "";
+
+          choices.forEach((choice) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            btn.textContent = choice;
+            btn.addEventListener("click", async () => {
+              if (hasSubmitted) return;
+              hasSubmitted = true;
+              disableChoiceButtons();
+              await post("/submit-answer", { answer: choice });
+            });
+            choicesGrid.appendChild(btn);
+          });
+        }
+
+        function disableChoiceButtons() {
+          document
+            .querySelectorAll(".choice-btn")
+            .forEach((b) => (b.disabled = true));
+        }
+
+        function showSessionSummary(data) {
+          summaryP1.textContent = data.finalScores.player1;
+          summaryP2.textContent = data.finalScores.player2;
+          summaryRounds.textContent = `${data.totalRounds} round${data.totalRounds !== 1 ? "s" : ""} played`;
+
+          if (data.finalScores.player1 > data.finalScores.player2)
+            summaryWinner.textContent = "🔷 Player 1 Wins!";
+          else if (data.finalScores.player2 > data.finalScores.player1)
+            summaryWinner.textContent = "🔮 Player 2 Wins!";
+          else summaryWinner.textContent = "It's a Tie!";
+
+          sessionOverlay.classList.add("show");
+        }
+
+        // ── Role selection ────────────────────────────
+        document.querySelectorAll(".role-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const role = btn.dataset.role;
+            try {
+              const res = await fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role }),
+              });
+              const data = await res.json();
+
+              if (res.status === 409) {
+                showToast(data.error);
+                return;
+              }
+              if (!res.ok) {
+                showToast(data.error || "Error");
+                return;
+              }
+
+              token = data.token;
+              currentRole = data.role;
+              prevPhase = null;
+              sessionStorage.setItem("gcc_token", token);
+              sessionStorage.setItem("gcc_role", currentRole);
+
+              if (currentRole === "admin") {
+                showPanel("admin-panel");
+              } else {
+                playerTitle.textContent =
+                  currentRole === "player1" ? "🔷 Player 1" : "🔮 Player 2";
+                showPanel("player-panel");
+              }
+
+              startPolling();
+            } catch (e) {
+              showToast("Connection error. Try again.");
+            }
+          });
+        });
+
+        // ── Leave / release role ──────────────────────
+        async function leaveRole(skipPost) {
+          stopPolling();
+          if (token && !skipPost) {
+            try {
+              await post("/release-role");
+            } catch (e) {}
+          }
+          token = null;
+          currentRole = null;
+          prevPhase = null;
+          hasSubmitted = false;
+          sessionOverlayDismissed = false;
+          sessionStorage.removeItem("gcc_token");
+          sessionStorage.removeItem("gcc_role");
+          adminResult.classList.remove("show");
+          playerResult.classList.remove("show");
+          sessionOverlay.classList.remove("show");
+          waitingMsg.style.display = "block";
+          choicesGrid.style.display = "none";
+          choicesGrid.innerHTML = "";
+          showPanel("role-select-panel");
+        }
+
+        $("btn-leave-admin").addEventListener("click", () => leaveRole());
+        $("btn-leave-player").addEventListener("click", () => leaveRole());
+
+        // Release role on page close
+        window.addEventListener("beforeunload", () => {
+          if (token) {
+            navigator.sendBeacon(
+              "/api/release-role",
+              new Blob([JSON.stringify({ token })], {
+                type: "application/json",
+              }),
+            );
+          }
+        });
+
+        // ── Admin actions ─────────────────────────────
+        $("btn-start").addEventListener("click", async () => {
+          const choices = Array.from(choiceInputs)
+            .map((i) => i.value.trim())
+            .filter(Boolean);
+          if (choices.length < 2) {
+            showToast("Enter at least 2 choices.");
+            return;
+          }
+          await post("/start-round", { choices });
+        });
+
+        $("btn-reset").addEventListener("click", async () => {
+          await post("/reset-round");
+        });
+
+        $("btn-end").addEventListener("click", async () => {
+          if (confirm("End the entire session and reset all scores?")) {
+            await post("/end-session");
+          }
+        });
+
+        // Score controls
+        document.querySelectorAll(".sc-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const player = btn.dataset.player;
+            const action = btn.dataset.action;
+            if (action === "add") await post("/award-point", { player });
+            else await post("/deduct-point", { player });
+          });
+        });
+
+        // Dismiss session overlay
+        $("btn-new-session").addEventListener("click", () => {
+          sessionOverlayDismissed = true;
+          sessionOverlay.classList.remove("show");
+        });
+
+        // ── Init: restore session on page refresh ─────
+        async function init() {
+          if (token && currentRole) {
+            try {
+              const res = await fetch(
+                `/api/state?token=${encodeURIComponent(token)}`,
+              );
+              const state = await res.json();
+
+              if (state.role === currentRole) {
+                if (currentRole === "admin") {
+                  showPanel("admin-panel");
+                } else {
+                  playerTitle.textContent =
+                    currentRole === "player1" ? "🔷 Player 1" : "🔮 Player 2";
+                  showPanel("player-panel");
+                }
+                startPolling();
+                return;
+              }
+            } catch (e) {}
+
+            // Token invalid
+            sessionStorage.removeItem("gcc_token");
+            sessionStorage.removeItem("gcc_role");
+            token = null;
+            currentRole = null;
+          }
+          showPanel("role-select-panel");
+        }
+
+        init();
+      })();
+    </script>
+  </body>
 </html>
