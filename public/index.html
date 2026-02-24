@@ -784,12 +784,14 @@
     <script>
       (() => {
         // ── Config ────────────────────────────────────
-        const POLL_MS = 350;
+        const POLL_MS = 2000;
+        const HEARTBEAT_MS = 10000;
 
         // ── State ─────────────────────────────────────
         let token = sessionStorage.getItem("gcc_token");
         let currentRole = sessionStorage.getItem("gcc_role");
         let pollTimer = null;
+        let heartbeatTimer = null;
         let prevPhase = null;
         let hasSubmitted = false;
         let sessionOverlayDismissed = false;
@@ -870,11 +872,12 @@
           }
         }
 
-        // ── Polling ───────────────────────────────────
+        // ── Polling & Heartbeat ──────────────────────
         function startPolling() {
           stopPolling();
           poll();
           pollTimer = setInterval(poll, POLL_MS);
+          startHeartbeat();
         }
 
         function stopPolling() {
@@ -882,6 +885,27 @@
             clearInterval(pollTimer);
             pollTimer = null;
           }
+          stopHeartbeat();
+        }
+
+        function startHeartbeat() {
+          stopHeartbeat();
+          sendHeartbeat();
+          heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_MS);
+        }
+
+        function stopHeartbeat() {
+          if (heartbeatTimer) {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+          }
+        }
+
+        async function sendHeartbeat() {
+          if (!token) return;
+          try {
+            await post("/heartbeat");
+          } catch (e) {}
         }
 
         async function poll() {
@@ -939,9 +963,9 @@
           }
 
           // Session overlay
-          if (state.sessionEndData && !sessionOverlayDismissed) {
-            showSessionSummary(state.sessionEndData);
-          } else if (!state.sessionEndData) {
+          if (state.sessionEnd && !sessionOverlayDismissed) {
+            showSessionSummary(state.sessionEnd);
+          } else if (!state.sessionEnd) {
             sessionOverlayDismissed = false;
             sessionOverlay.classList.remove("show");
           }
