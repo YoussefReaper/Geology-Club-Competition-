@@ -893,16 +893,38 @@
             const state = await res.json();
             connDot.classList.remove("offline");
 
-            // Token invalid (server restarted)
-            if (!state.role) {
-              leaveRole(true);
-              showToast("Session lost — please rejoin.");
+            // Token not recognized (server cold-restarted) — silently re-register
+            if (!state.role && currentRole) {
+              const ok = await silentReregister();
+              if (!ok) {
+                leaveRole(true);
+                showToast("Session lost — please rejoin.");
+              }
               return;
             }
 
             render(state);
           } catch (e) {
             connDot.classList.add("offline");
+          }
+        }
+
+        // Transparently reclaim the same role after server restart
+        async function silentReregister() {
+          try {
+            const res = await fetch("/api/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ role: currentRole, force: true }),
+            });
+            if (!res.ok) return false;
+            const data = await res.json();
+            token = data.token;
+            sessionStorage.setItem("gcc_token", token);
+            console.log("Silently re-registered as", currentRole);
+            return true;
+          } catch (e) {
+            return false;
           }
         }
 
@@ -1136,6 +1158,21 @@
               const state = await res.json();
 
               if (state.role === currentRole) {
+                // Token still valid — resume
+                if (currentRole === "admin") {
+                  showPanel("admin-panel");
+                } else {
+                  playerTitle.textContent =
+                    currentRole === "player1" ? "🔷 Player 1" : "🔮 Player 2";
+                  showPanel("player-panel");
+                }
+                startPolling();
+                return;
+              }
+
+              // Token invalid but we know the role — try re-registering
+              const ok = await silentReregister();
+              if (ok) {
                 if (currentRole === "admin") {
                   showPanel("admin-panel");
                 } else {
@@ -1148,7 +1185,7 @@
               }
             } catch (e) {}
 
-            // Token invalid
+            // Completely failed
             sessionStorage.removeItem("gcc_token");
             sessionStorage.removeItem("gcc_role");
             token = null;

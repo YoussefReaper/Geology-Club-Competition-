@@ -18,6 +18,12 @@ let gameState = {
 // Role tokens: each role maps to a unique token when claimed
 let roleTokens = { admin: null, player1: null, player2: null };
 
+// Track when each role last polled (for auto-expiry)
+let roleLastSeen = { admin: 0, player1: 0, player2: 0 };
+
+// How long before a role is considered abandoned (ms)
+const ROLE_EXPIRY_MS = 15000;
+
 // Stored session-end results (shown until next round starts)
 let sessionEndData = null;
 
@@ -34,6 +40,18 @@ function roleOf(token) {
   return null;
 }
 
+// Auto-expire roles that haven't polled recently
+function expireStaleRoles() {
+  const now = Date.now();
+  for (const role of ['admin', 'player1', 'player2']) {
+    if (roleTokens[role] && (now - roleLastSeen[role]) > ROLE_EXPIRY_MS) {
+      console.log(`Auto-expiring stale role: ${role}`);
+      roleTokens[role] = null;
+      roleLastSeen[role] = 0;
+    }
+  }
+}
+
 function touch() {
   gameState.lastUpdate = Date.now();
 }
@@ -42,7 +60,10 @@ function touch() {
 
 // GET /api/state — polled by every client ~350ms
 app.get("/api/state", (req, res) => {
+  expireStaleRoles();
   const role = roleOf(req.query.token);
+  // Update last-seen timestamp for this role
+  if (role) roleLastSeen[role] = Date.now();
   res.json({
     phase: gameState.phase,
     choices: gameState.choices,
@@ -58,24 +79,35 @@ app.get("/api/state", (req, res) => {
 
 // POST /api/register — claim a role
 app.post("/api/register", (req, res) => {
-  const { role } = req.body;
+  const { role, force } = req.body;
   if (!["admin", "player1", "player2"].includes(role)) {
     return res.status(400).json({ error: "Invalid role" });
   }
+  // Expire stale roles before checking
+  expireStaleRoles();
   if (roleTokens[role]) {
-    return res
-      .status(409)
-      .json({ error: `${role} is already taken! Choose another role.` });
+    // If force=true, allow reclaiming (client lost connection, same user)
+    if (force) {
+      console.log(`Force-reclaiming role: ${role}`);
+    } else {
+      return res
+        .status(409)
+        .json({ error: `${role} is already taken! Choose another role.` });
+    }
   }
   const token = genToken();
   roleTokens[role] = token;
+  roleLastSeen[role] = Date.now();
   res.json({ token, role });
 });
 
 // POST /api/release-role — free a role (leave / page close)
 app.post("/api/release-role", (req, res) => {
   const role = roleOf(req.body.token);
-  if (role) roleTokens[role] = null;
+  if (role) {
+    roleTokens[role] = null;
+    roleLastSeen[role] = 0;
+  }
   res.json({ ok: true });
 });
 
