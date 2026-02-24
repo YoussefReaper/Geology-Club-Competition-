@@ -1,16 +1,13 @@
 {
   "name": "gcc-geology-club-competition",
-  "version": "1.0.0",
-  "description": "GCC — Real-time Geology Club Competition buzzer system",
+  "version": "2.0.0",
+  "description": "Geology Club Competition — Real-time quiz buzzer system (Vercel-ready)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.4"
+    "express": "^4.18.2"
   }
 }
