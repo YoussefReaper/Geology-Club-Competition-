@@ -28,6 +28,7 @@
         --accent2: #3ab0e6;
         --amber: #f0a830;
         --red: #e55050;
+        --green: #34d399;
         --p1-color: #3ab0e6;
         --p2-color: #b07ce8;
         --text: #e0e7ef;
@@ -167,54 +168,60 @@
         letter-spacing: 0.5px;
       }
 
-      /* ── Admin score controls ──────────────────── */
-      .score-controls {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-      }
-      .score-ctrl-group {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        justify-content: center;
-      }
-      .score-ctrl-group .sc-label {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        min-width: 24px;
-      }
-      .score-ctrl-group.p1 .sc-label {
-        color: var(--p1-color);
-      }
-      .score-ctrl-group.p2 .sc-label {
-        color: var(--p2-color);
-      }
-      .sc-btn {
-        width: 30px;
-        height: 30px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        background: var(--bg-input);
+      /* ── Editable Score Input (admin) ──────────── */
+      .score-input {
+        width: 72px;
+        font-size: 2rem;
+        font-weight: 800;
         color: var(--text);
-        font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.12s;
+        background: var(--bg-input);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-align: center;
+        padding: 0.2rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+        -moz-appearance: textfield;
+        appearance: textfield;
       }
-      .sc-btn:hover {
+      .score-input::-webkit-outer-spin-button,
+      .score-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 0;
+      }
+      .score-input:focus {
         border-color: var(--accent);
-        background: #1e3344;
       }
-      .sc-btn.minus:hover {
-        border-color: var(--red);
-        background: #301a1a;
+
+      /* ── Mode Tabs ─────────────────────────────── */
+      .mode-tabs {
+        display: flex;
+        margin-bottom: 1rem;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        border: 1.5px solid var(--border);
+      }
+      .mode-tab {
+        flex: 1;
+        padding: 0.65rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: inherit;
+        border: none;
+        background: var(--bg-input);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .mode-tab.active {
+        background: var(--accent);
+        color: #062016;
+      }
+      .mode-tab:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       /* ── Role Selection ────────────────────────── */
@@ -353,7 +360,7 @@
         color: #fff;
       }
 
-      /* ── Player view ───────────────────────────── */
+      /* ── Player Waiting ────────────────────────── */
       .waiting-msg {
         text-align: center;
         font-size: 1.15rem;
@@ -377,6 +384,50 @@
         }
       }
 
+      /* ── Buzzer Button ─────────────────────────── */
+      .buzz-container {
+        display: flex;
+        justify-content: center;
+        padding: 2rem 0;
+      }
+      .buzz-btn {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        border: 4px solid #c0392b;
+        background: radial-gradient(circle at 35% 35%, #e74c3c, #c0392b);
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow:
+          0 8px 30px rgba(231, 76, 60, 0.4),
+          inset 0 -4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.1s;
+        line-height: 1.3;
+        user-select: none;
+      }
+      .buzz-btn:hover {
+        transform: scale(1.05);
+        box-shadow:
+          0 12px 40px rgba(231, 76, 60, 0.5),
+          inset 0 -4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .buzz-btn:active {
+        transform: scale(0.95);
+        box-shadow:
+          0 4px 20px rgba(231, 76, 60, 0.3),
+          inset 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      .buzz-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* ── Choice Buttons ────────────────────────── */
       .choices-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -434,6 +485,49 @@
       .result-banner .answer {
         font-size: 1rem;
         color: var(--text-dim);
+      }
+
+      /* ── Buzz Timer ────────────────────────────── */
+      .buzz-timer {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--amber);
+        margin: 0.5rem 0;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 1px;
+      }
+
+      /* ── Judge Buttons ─────────────────────────── */
+      .judge-buttons {
+        display: flex;
+        gap: 0.6rem;
+        justify-content: center;
+        margin-top: 0.75rem;
+      }
+      .btn-correct {
+        flex: none;
+        background: linear-gradient(135deg, #34d399, #22a87a);
+        color: #062016;
+        padding: 0.6rem 1.5rem;
+      }
+      .btn-incorrect {
+        flex: none;
+        background: linear-gradient(135deg, #f87171, #e53e3e);
+        color: #fff;
+        padding: 0.6rem 1.5rem;
+      }
+
+      /* ── Judge Result Badge ────────────────────── */
+      .judge-result {
+        margin-top: 0.6rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .judge-result.correct {
+        color: var(--green);
+      }
+      .judge-result.incorrect {
+        color: var(--red);
       }
 
       /* ── Session Overlay ───────────────────────── */
@@ -604,6 +698,14 @@
         background: var(--red);
         box-shadow: 0 0 6px rgba(229, 80, 80, 0.5);
       }
+
+      /* ── Admin waiting hint ────────────────────── */
+      .admin-waiting-hint {
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        padding: 1.5rem 0;
+      }
     </style>
   </head>
   <body>
@@ -675,49 +777,42 @@
           <h1>🛡️ GCC — Admin Panel</h1>
         </div>
 
+        <!-- Scoreboard with editable inputs -->
         <div class="scoreboard">
           <div class="score-player p1">
             <div class="label">Player 1</div>
-            <div class="points" id="admin-score-p1">0</div>
+            <input
+              type="number"
+              class="score-input"
+              id="admin-score-p1"
+              value="0"
+              min="0"
+            />
           </div>
           <div class="score-divider">:</div>
           <div class="score-player p2">
             <div class="label">Player 2</div>
-            <div class="points" id="admin-score-p2">0</div>
+            <input
+              type="number"
+              class="score-input"
+              id="admin-score-p2"
+              value="0"
+              min="0"
+            />
           </div>
         </div>
         <div class="round-badge" id="admin-round-badge">Round 0</div>
 
-        <div class="score-controls">
-          <div class="score-ctrl-group p1">
-            <span class="sc-label">P1</span>
-            <button class="sc-btn" data-player="player1" data-action="add">
-              +
-            </button>
-            <button
-              class="sc-btn minus"
-              data-player="player1"
-              data-action="sub"
-            >
-              −
-            </button>
-          </div>
-          <div class="score-ctrl-group p2">
-            <span class="sc-label">P2</span>
-            <button class="sc-btn" data-player="player2" data-action="add">
-              +
-            </button>
-            <button
-              class="sc-btn minus"
-              data-player="player2"
-              data-action="sub"
-            >
-              −
-            </button>
-          </div>
+        <!-- Mode Tabs -->
+        <div class="mode-tabs" id="mode-tabs">
+          <button class="mode-tab active" data-mode="buzzer">
+            🔔 Buzzer
+          </button>
+          <button class="mode-tab" data-mode="choice">📋 Choice</button>
         </div>
 
-        <div class="choice-inputs" id="choice-inputs">
+        <!-- Choice Inputs (choice mode only) -->
+        <div class="choice-inputs" id="choice-inputs" style="display: none">
           <input type="text" placeholder="Choice A" maxlength="80" />
           <input type="text" placeholder="Choice B" maxlength="80" />
           <input type="text" placeholder="Choice C" maxlength="80" />
@@ -725,6 +820,7 @@
           <input type="text" placeholder="Choice E (optional)" maxlength="80" />
         </div>
 
+        <!-- Action Buttons -->
         <div class="admin-actions">
           <button class="btn btn-start" id="btn-start">▶ Start Round</button>
           <button class="btn btn-reset" id="btn-reset">↺ Reset Round</button>
@@ -733,10 +829,32 @@
           <button class="btn btn-end" id="btn-end">■ End Session</button>
         </div>
 
+        <!-- Admin waiting hint (during active round) -->
+        <div class="admin-waiting-hint" id="admin-active-hint" style="display: none">
+          <span class="spinner" style="display:inline-block;width:16px;height:16px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:0.4rem"></span>
+          Waiting for a player to respond…
+        </div>
+
+        <!-- Result Banner with Judge controls -->
         <div class="result-banner" id="admin-result">
           <div class="winner" id="admin-result-winner"></div>
-          <div class="answer" id="admin-result-answer"></div>
+          <div class="buzz-timer" id="admin-timer" style="display: none"></div>
+          <div class="answer" id="admin-result-answer" style="display: none"></div>
+          <div class="judge-buttons" id="judge-buttons" style="display: none">
+            <button class="btn btn-correct" id="btn-correct">
+              ✓ Correct
+            </button>
+            <button class="btn btn-incorrect" id="btn-incorrect">
+              ✗ Incorrect
+            </button>
+          </div>
+          <div
+            class="judge-result"
+            id="admin-judge-result"
+            style="display: none"
+          ></div>
         </div>
+
         <div class="status-bar" id="admin-status">
           <span class="dot waiting"></span> Waiting
         </div>
@@ -750,6 +868,7 @@
           <div class="subtitle">Geology Club Competition</div>
         </div>
 
+        <!-- Scoreboard (read-only) -->
         <div class="scoreboard">
           <div class="score-player p1">
             <div class="label">Player 1</div>
@@ -763,15 +882,39 @@
         </div>
         <div class="round-badge" id="player-round-badge">Round 0</div>
 
+        <!-- Waiting Message -->
         <div class="waiting-msg" id="waiting-msg">
           <span class="spinner"></span> Waiting for Host…
         </div>
+
+        <!-- Buzzer Button (buzzer mode) -->
+        <div class="buzz-container" id="buzz-container" style="display: none">
+          <button class="buzz-btn" id="btn-buzz">🔴<br />BUZZ!</button>
+        </div>
+
+        <!-- Choices Grid (choice mode) -->
         <div class="choices-grid" id="choices-grid" style="display: none"></div>
 
+        <!-- Player Result -->
         <div class="result-banner" id="player-result">
           <div class="winner" id="player-result-winner"></div>
-          <div class="answer" id="player-result-answer"></div>
+          <div
+            class="buzz-timer"
+            id="player-timer"
+            style="display: none"
+          ></div>
+          <div
+            class="answer"
+            id="player-result-answer"
+            style="display: none"
+          ></div>
+          <div
+            class="judge-result"
+            id="player-judge-result"
+            style="display: none"
+          ></div>
         </div>
+
         <div class="status-bar" id="player-status">
           <span class="dot waiting"></span> Waiting
         </div>
@@ -795,6 +938,11 @@
         let prevPhase = null;
         let hasSubmitted = false;
         let sessionOverlayDismissed = false;
+        let selectedMode = "buzzer";
+
+        // Timer state
+        let timerRef = null; // { buzzTime, serverTime, clientTime }
+        let timerInterval = null;
 
         // ── DOM refs ──────────────────────────────────
         const $ = (id) => document.getElementById(id);
@@ -810,12 +958,19 @@
         const adminResult = $("admin-result"),
           adminWinner = $("admin-result-winner"),
           adminAnswer = $("admin-result-answer");
+        const adminTimer = $("admin-timer");
+        const judgeButtons = $("judge-buttons"),
+          adminJudgeResult = $("admin-judge-result");
         const playerResult = $("player-result"),
           playerWinner = $("player-result-winner"),
           playerAnswer = $("player-result-answer");
+        const playerTimer = $("player-timer");
+        const playerJudgeResult = $("player-judge-result");
         const playerTitle = $("player-title");
         const waitingMsg = $("waiting-msg"),
           choicesGrid = $("choices-grid");
+        const buzzContainer = $("buzz-container"),
+          btnBuzz = $("btn-buzz");
         const toast = $("toast"),
           connDot = $("conn-dot");
         const sessionOverlay = $("session-overlay");
@@ -823,7 +978,10 @@
           summaryP2 = $("summary-p2");
         const summaryRounds = $("summary-rounds"),
           summaryWinner = $("summary-winner");
+        const choiceInputsDiv = $("choice-inputs");
         const choiceInputs = document.querySelectorAll("#choice-inputs input");
+        const modeTabs = document.querySelectorAll(".mode-tab");
+        const adminActiveHint = $("admin-active-hint");
 
         // ── API helper ────────────────────────────────
         async function post(path, data = {}) {
@@ -847,7 +1005,7 @@
           const labels = {
             waiting: "Waiting",
             active: "Round Active",
-            answered: "Round Over",
+            answered: "Answered",
           };
           el.innerHTML = `<span class="dot ${phase}"></span> ${labels[phase] || phase}`;
         }
@@ -860,8 +1018,11 @@
 
         function updateScores(scores, round) {
           if (scores) {
-            adminScoreP1.textContent = scores.player1;
-            adminScoreP2.textContent = scores.player2;
+            // Don't overwrite admin inputs while they're being edited
+            if (document.activeElement !== adminScoreP1)
+              adminScoreP1.value = scores.player1;
+            if (document.activeElement !== adminScoreP2)
+              adminScoreP2.value = scores.player2;
             playerScoreP1.textContent = scores.player1;
             playerScoreP2.textContent = scores.player2;
           }
@@ -872,7 +1033,63 @@
           }
         }
 
-        // ── Polling & Heartbeat ──────────────────────
+        // ── Timer ─────────────────────────────────────
+        function formatTimer(ms) {
+          const totalSecs = Math.floor(ms / 1000);
+          const tenths = Math.floor((ms % 1000) / 100);
+          const mins = Math.floor(totalSecs / 60);
+          const secs = totalSecs % 60;
+          return `⏱ ${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}.${tenths}`;
+        }
+
+        function startBuzzTimer(buzzTime, serverTime) {
+          timerRef = {
+            buzzTime,
+            serverTime,
+            clientTime: Date.now(),
+          };
+          stopBuzzTimer();
+          timerInterval = setInterval(updateTimerDisplay, 100);
+          updateTimerDisplay();
+        }
+
+        function stopBuzzTimer() {
+          if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+          }
+        }
+
+        function freezeTimer(judgedTime, buzzTime) {
+          stopBuzzTimer();
+          const ms = judgedTime - buzzTime;
+          const display = formatTimer(ms);
+          adminTimer.textContent = display;
+          adminTimer.style.display = "block";
+          playerTimer.textContent = display;
+          playerTimer.style.display = "block";
+        }
+
+        function updateTimerDisplay() {
+          if (!timerRef) return;
+          const serverElapsed = timerRef.serverTime - timerRef.buzzTime;
+          const localElapsed = Date.now() - timerRef.clientTime;
+          const totalMs = Math.max(0, serverElapsed + localElapsed);
+          const display = formatTimer(totalMs);
+          adminTimer.textContent = display;
+          adminTimer.style.display = "block";
+          playerTimer.textContent = display;
+          playerTimer.style.display = "block";
+        }
+
+        function hideTimers() {
+          stopBuzzTimer();
+          timerRef = null;
+          adminTimer.style.display = "none";
+          playerTimer.style.display = "none";
+        }
+
+        // ── Polling & Heartbeat ───────────────────────
         function startPolling() {
           stopPolling();
           poll();
@@ -917,7 +1134,6 @@
             const state = await res.json();
             connDot.classList.remove("offline");
 
-            // Token not recognized (server cold-restarted) — silently re-register
             if (!state.role && currentRole) {
               const ok = await silentReregister();
               if (!ok) {
@@ -933,7 +1149,6 @@
           }
         }
 
-        // Transparently reclaim the same role after server restart
         async function silentReregister() {
           try {
             const res = await fetch("/api/register", {
@@ -945,7 +1160,6 @@
             const data = await res.json();
             token = data.token;
             sessionStorage.setItem("gcc_token", token);
-            console.log("Silently re-registered as", currentRole);
             return true;
           } catch (e) {
             return false;
@@ -955,6 +1169,21 @@
         // ── Render ────────────────────────────────────
         function render(state) {
           updateScores(state.scores, state.round);
+
+          // Timer management (buzzer mode)
+          if (
+            state.phase === "answered" &&
+            state.mode === "buzzer" &&
+            state.buzzTime
+          ) {
+            if (state.judged && state.judgedTime) {
+              freezeTimer(state.judgedTime, state.buzzTime);
+            } else if (!timerRef || timerRef.buzzTime !== state.buzzTime) {
+              startBuzzTimer(state.buzzTime, state.serverTime);
+            }
+          } else {
+            hideTimers();
+          }
 
           if (currentRole === "admin") {
             renderAdmin(state);
@@ -975,41 +1204,131 @@
 
         function renderAdmin(state) {
           setStatus(adminStatus, state.phase);
+
+          // Mode tabs: only enabled when waiting
+          modeTabs.forEach((tab) => {
+            tab.disabled = state.phase !== "waiting";
+            if (state.phase === "waiting") {
+              tab.classList.toggle(
+                "active",
+                tab.dataset.mode === selectedMode,
+              );
+            } else {
+              tab.classList.toggle("active", tab.dataset.mode === state.mode);
+            }
+          });
+
+          // Choice inputs: show only in waiting + choice mode
+          if (state.phase === "waiting") {
+            choiceInputsDiv.style.display =
+              selectedMode === "choice" ? "flex" : "none";
+          } else {
+            choiceInputsDiv.style.display = "none";
+          }
+
+          // Active hint
+          adminActiveHint.style.display =
+            state.phase === "active" ? "block" : "none";
+
+          // Result banner
           if (state.phase === "answered" && state.winner) {
-            adminWinner.textContent = `🏆 ${state.winner} buzzed in first!`;
-            adminAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
+            adminWinner.textContent = `🏆 ${state.winner} ${state.mode === "buzzer" ? "buzzed first!" : "answered first!"}`;
+
+            if (state.mode === "choice" && state.winnerAnswer) {
+              adminAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
+              adminAnswer.style.display = "block";
+            } else {
+              adminAnswer.style.display = "none";
+            }
+
+            // Judge buttons or result
+            if (!state.judged) {
+              judgeButtons.style.display = "flex";
+              adminJudgeResult.style.display = "none";
+            } else {
+              judgeButtons.style.display = "none";
+              adminJudgeResult.style.display = "block";
+              if (state.judged === "correct") {
+                adminJudgeResult.textContent = `✓ Correct! +1 to ${state.winner}`;
+                adminJudgeResult.className = "judge-result correct";
+              } else {
+                adminJudgeResult.textContent = `✗ Incorrect — no points`;
+                adminJudgeResult.className = "judge-result incorrect";
+              }
+            }
+
             adminResult.classList.add("show");
           } else {
             adminResult.classList.remove("show");
+            judgeButtons.style.display = "none";
+            adminJudgeResult.style.display = "none";
           }
         }
 
         function renderPlayer(state) {
           setStatus(playerStatus, state.phase);
 
-          // Only act on phase transitions
-          if (state.phase === prevPhase) return;
+          const enteringPhase = state.phase !== prevPhase;
+
+          // Reset visibility on phase transition
+          if (enteringPhase) {
+            buzzContainer.style.display = "none";
+            choicesGrid.style.display = "none";
+            waitingMsg.style.display = "none";
+            playerResult.classList.remove("show");
+            playerAnswer.style.display = "none";
+            playerJudgeResult.style.display = "none";
+          }
 
           switch (state.phase) {
             case "waiting":
-              waitingMsg.style.display = "block";
-              choicesGrid.style.display = "none";
-              choicesGrid.innerHTML = "";
-              playerResult.classList.remove("show");
-              hasSubmitted = false;
+              if (enteringPhase) {
+                waitingMsg.style.display = "block";
+                choicesGrid.innerHTML = "";
+                hasSubmitted = false;
+              }
               break;
 
             case "active":
-              hasSubmitted = false;
-              renderChoices(state.choices);
-              playerResult.classList.remove("show");
+              if (enteringPhase) {
+                hasSubmitted = false;
+                if (state.mode === "buzzer") {
+                  buzzContainer.style.display = "flex";
+                  btnBuzz.disabled = false;
+                } else {
+                  renderChoices(state.choices);
+                }
+              }
               break;
 
             case "answered":
-              disableChoiceButtons();
-              playerWinner.textContent = `🏆 ${state.winner} buzzed in first!`;
-              playerAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
-              playerResult.classList.add("show");
+              if (enteringPhase) {
+                btnBuzz.disabled = true;
+                disableChoiceButtons();
+
+                playerWinner.textContent = `🏆 ${state.winner} ${state.mode === "buzzer" ? "buzzed first!" : "answered first!"}`;
+
+                if (state.mode === "choice" && state.winnerAnswer) {
+                  playerAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
+                  playerAnswer.style.display = "block";
+                }
+
+                playerResult.classList.add("show");
+              }
+
+              // Always update judged (can arrive after initial answered)
+              if (state.judged) {
+                playerJudgeResult.style.display = "block";
+                if (state.judged === "correct") {
+                  playerJudgeResult.textContent = `✓ Correct! +1 to ${state.winner}`;
+                  playerJudgeResult.className = "judge-result correct";
+                } else {
+                  playerJudgeResult.textContent = `✗ Incorrect — no points`;
+                  playerJudgeResult.className = "judge-result incorrect";
+                }
+              } else {
+                playerJudgeResult.style.display = "none";
+              }
               break;
           }
         }
@@ -1052,6 +1371,19 @@
 
           sessionOverlay.classList.add("show");
         }
+
+        // ── Mode Tab selection ────────────────────────
+        modeTabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            if (tab.disabled) return;
+            selectedMode = tab.dataset.mode;
+            modeTabs.forEach((t) =>
+              t.classList.toggle("active", t.dataset.mode === selectedMode),
+            );
+            choiceInputsDiv.style.display =
+              selectedMode === "choice" ? "flex" : "none";
+          });
+        });
 
         // ── Role selection ────────────────────────────
         document.querySelectorAll(".role-btn").forEach((btn) => {
@@ -1098,6 +1430,7 @@
         // ── Leave / release role ──────────────────────
         async function leaveRole(skipPost) {
           stopPolling();
+          hideTimers();
           if (token && !skipPost) {
             try {
               await post("/release-role");
@@ -1114,6 +1447,7 @@
           playerResult.classList.remove("show");
           sessionOverlay.classList.remove("show");
           waitingMsg.style.display = "block";
+          buzzContainer.style.display = "none";
           choicesGrid.style.display = "none";
           choicesGrid.innerHTML = "";
           showPanel("role-select-panel");
@@ -1136,14 +1470,18 @@
 
         // ── Admin actions ─────────────────────────────
         $("btn-start").addEventListener("click", async () => {
-          const choices = Array.from(choiceInputs)
-            .map((i) => i.value.trim())
-            .filter(Boolean);
-          if (choices.length < 2) {
-            showToast("Enter at least 2 choices.");
-            return;
+          if (selectedMode === "choice") {
+            const choices = Array.from(choiceInputs)
+              .map((i) => i.value.trim())
+              .filter(Boolean);
+            if (choices.length < 2) {
+              showToast("Enter at least 2 choices.");
+              return;
+            }
+            await post("/start-round", { mode: "choice", choices });
+          } else {
+            await post("/start-round", { mode: "buzzer" });
           }
-          await post("/start-round", { choices });
         });
 
         $("btn-reset").addEventListener("click", async () => {
@@ -1156,14 +1494,36 @@
           }
         });
 
-        // Score controls
-        document.querySelectorAll(".sc-btn").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const player = btn.dataset.player;
-            const action = btn.dataset.action;
-            if (action === "add") await post("/award-point", { player });
-            else await post("/deduct-point", { player });
+        // ── Judge buttons ─────────────────────────────
+        $("btn-correct").addEventListener("click", async () => {
+          await post("/judge", { correct: true });
+        });
+
+        $("btn-incorrect").addEventListener("click", async () => {
+          await post("/judge", { correct: false });
+        });
+
+        // ── Score editing (admin) ─────────────────────
+        function setupScoreInput(input, player) {
+          const commit = async () => {
+            const val = Math.max(0, Math.floor(Number(input.value) || 0));
+            input.value = val;
+            await post("/set-score", { player, score: val });
+          };
+          input.addEventListener("change", commit);
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") input.blur();
           });
+        }
+        setupScoreInput(adminScoreP1, "player1");
+        setupScoreInput(adminScoreP2, "player2");
+
+        // ── Buzzer button (player) ────────────────────
+        btnBuzz.addEventListener("click", async () => {
+          if (hasSubmitted) return;
+          hasSubmitted = true;
+          btnBuzz.disabled = true;
+          await post("/buzz");
         });
 
         // Dismiss session overlay
@@ -1182,7 +1542,6 @@
               const state = await res.json();
 
               if (state.role === currentRole) {
-                // Token still valid — resume
                 if (currentRole === "admin") {
                   showPanel("admin-panel");
                 } else {
@@ -1194,7 +1553,6 @@
                 return;
               }
 
-              // Token invalid but we know the role — try re-registering
               const ok = await silentReregister();
               if (ok) {
                 if (currentRole === "admin") {
@@ -1209,7 +1567,6 @@
               }
             } catch (e) {}
 
-            // Completely failed
             sessionStorage.removeItem("gcc_token");
             sessionStorage.removeItem("gcc_role");
             token = null;
