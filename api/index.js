@@ -43,8 +43,8 @@ function roleOf(token) {
 // Auto-expire roles that haven't polled recently
 function expireStaleRoles() {
   const now = Date.now();
-  for (const role of ['admin', 'player1', 'player2']) {
-    if (roleTokens[role] && (now - roleLastSeen[role]) > ROLE_EXPIRY_MS) {
+  for (const role of ["admin", "player1", "player2"]) {
+    if (roleTokens[role] && now - roleLastSeen[role] > ROLE_EXPIRY_MS) {
       console.log(`Auto-expiring stale role: ${role}`);
       roleTokens[role] = null;
       roleLastSeen[role] = 0;
