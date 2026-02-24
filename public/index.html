@@ -1280,51 +1280,60 @@
 
           const enteringPhase = state.phase !== prevPhase;
 
-          // Reset visibility on phase transition
-          if (enteringPhase) {
-            buzzContainer.style.display = "none";
-            choicesGrid.style.display = "none";
-            waitingMsg.style.display = "none";
-            playerResult.classList.remove("show");
-            playerAnswer.style.display = "none";
-            playerJudgeResult.style.display = "none";
-          }
-
+          // Always enforce correct visibility for current phase
           switch (state.phase) {
             case "waiting":
+              buzzContainer.style.display = "none";
+              choicesGrid.style.display = "none";
+              waitingMsg.style.display = "block";
+              playerResult.classList.remove("show");
+              playerAnswer.style.display = "none";
+              playerJudgeResult.style.display = "none";
               if (enteringPhase) {
-                waitingMsg.style.display = "block";
                 choicesGrid.innerHTML = "";
                 hasSubmitted = false;
               }
               break;
 
             case "active":
-              if (enteringPhase) {
-                hasSubmitted = false;
-                if (state.mode === "buzzer") {
-                  buzzContainer.style.display = "flex";
+              waitingMsg.style.display = "none";
+              playerResult.classList.remove("show");
+              playerAnswer.style.display = "none";
+              playerJudgeResult.style.display = "none";
+              if (state.mode === "buzzer") {
+                buzzContainer.style.display = "flex";
+                choicesGrid.style.display = "none";
+                if (enteringPhase) {
+                  hasSubmitted = false;
                   btnBuzz.disabled = false;
-                } else {
+                }
+              } else {
+                buzzContainer.style.display = "none";
+                if (enteringPhase) {
+                  hasSubmitted = false;
                   renderChoices(state.choices);
+                } else {
+                  choicesGrid.style.display = "grid";
                 }
               }
               break;
 
             case "answered":
-              if (enteringPhase) {
-                btnBuzz.disabled = true;
-                disableChoiceButtons();
+              buzzContainer.style.display = "none";
+              waitingMsg.style.display = "none";
+              btnBuzz.disabled = true;
+              disableChoiceButtons();
 
-                playerWinner.textContent = `🏆 ${state.winner} ${state.mode === "buzzer" ? "buzzed first!" : "answered first!"}`;
+              playerWinner.textContent = `🏆 ${state.winner} ${state.mode === "buzzer" ? "buzzed first!" : "answered first!"}`;
 
-                if (state.mode === "choice" && state.winnerAnswer) {
-                  playerAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
-                  playerAnswer.style.display = "block";
-                }
-
-                playerResult.classList.add("show");
+              if (state.mode === "choice" && state.winnerAnswer) {
+                playerAnswer.textContent = `Answer: "${state.winnerAnswer}"`;
+                playerAnswer.style.display = "block";
+              } else {
+                playerAnswer.style.display = "none";
               }
+
+              playerResult.classList.add("show");
 
               // Always update judged (can arrive after initial answered)
               if (state.judged) {
@@ -1348,10 +1357,12 @@
           choicesGrid.style.display = "grid";
           choicesGrid.innerHTML = "";
 
-          choices.forEach((choice) => {
+          choices.forEach((choice, idx) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn";
-            btn.textContent = choice;
+            const num = idx + 1;
+            btn.innerHTML = `<span style="opacity:.45;font-size:.75rem;display:block;margin-bottom:2px">[${num}]</span>${choice}`;
+            btn.dataset.choiceIndex = num;
             btn.addEventListener("click", async () => {
               if (hasSubmitted) return;
               hasSubmitted = true;
@@ -1529,11 +1540,44 @@
         setupScoreInput(adminScoreP2, "player2");
 
         // ── Buzzer button (player) ────────────────────
-        btnBuzz.addEventListener("click", async () => {
+        async function doBuzz() {
           if (hasSubmitted) return;
           hasSubmitted = true;
           btnBuzz.disabled = true;
           await post("/buzz");
+        }
+        btnBuzz.addEventListener("click", doBuzz);
+
+        // ── Keyboard shortcuts ────────────────────────
+        document.addEventListener("keydown", (e) => {
+          // Ignore if typing in an input
+          if (
+            e.target.tagName === "INPUT" ||
+            e.target.tagName === "TEXTAREA"
+          )
+            return;
+          if (currentRole !== "player1" && currentRole !== "player2") return;
+
+          // Space = buzz (buzzer mode)
+          if (e.code === "Space") {
+            e.preventDefault();
+            if (
+              buzzContainer.style.display !== "none" &&
+              !btnBuzz.disabled
+            ) {
+              doBuzz();
+            }
+          }
+
+          // 1-9 = choose answer (choice mode)
+          if (e.key >= "1" && e.key <= "9") {
+            const btn = choicesGrid.querySelector(
+              `[data-choice-index="${e.key}"]`,
+            );
+            if (btn && !btn.disabled && choicesGrid.style.display !== "none") {
+              btn.click();
+            }
+          }
         });
 
         // Dismiss session overlay
