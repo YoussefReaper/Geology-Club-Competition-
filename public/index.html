@@ -805,9 +805,7 @@
 
         <!-- Mode Tabs -->
         <div class="mode-tabs" id="mode-tabs">
-          <button class="mode-tab active" data-mode="buzzer">
-            🔔 Buzzer
-          </button>
+          <button class="mode-tab active" data-mode="buzzer">🔔 Buzzer</button>
           <button class="mode-tab" data-mode="choice">📋 Choice</button>
         </div>
 
@@ -830,8 +828,25 @@
         </div>
 
         <!-- Admin waiting hint (during active round) -->
-        <div class="admin-waiting-hint" id="admin-active-hint" style="display: none">
-          <span class="spinner" style="display:inline-block;width:16px;height:16px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:0.4rem"></span>
+        <div
+          class="admin-waiting-hint"
+          id="admin-active-hint"
+          style="display: none"
+        >
+          <span
+            class="spinner"
+            style="
+              display: inline-block;
+              width: 16px;
+              height: 16px;
+              border: 2.5px solid var(--border);
+              border-top-color: var(--accent);
+              border-radius: 50%;
+              animation: spin 0.8s linear infinite;
+              vertical-align: middle;
+              margin-right: 0.4rem;
+            "
+          ></span>
           Waiting for a player to respond…
         </div>
 
@@ -839,11 +854,13 @@
         <div class="result-banner" id="admin-result">
           <div class="winner" id="admin-result-winner"></div>
           <div class="buzz-timer" id="admin-timer" style="display: none"></div>
-          <div class="answer" id="admin-result-answer" style="display: none"></div>
+          <div
+            class="answer"
+            id="admin-result-answer"
+            style="display: none"
+          ></div>
           <div class="judge-buttons" id="judge-buttons" style="display: none">
-            <button class="btn btn-correct" id="btn-correct">
-              ✓ Correct
-            </button>
+            <button class="btn btn-correct" id="btn-correct">✓ Correct</button>
             <button class="btn btn-incorrect" id="btn-incorrect">
               ✗ Incorrect
             </button>
@@ -898,11 +915,7 @@
         <!-- Player Result -->
         <div class="result-banner" id="player-result">
           <div class="winner" id="player-result-winner"></div>
-          <div
-            class="buzz-timer"
-            id="player-timer"
-            style="display: none"
-          ></div>
+          <div class="buzz-timer" id="player-timer" style="display: none"></div>
           <div
             class="answer"
             id="player-result-answer"
@@ -1209,10 +1222,7 @@
           modeTabs.forEach((tab) => {
             tab.disabled = state.phase !== "waiting";
             if (state.phase === "waiting") {
-              tab.classList.toggle(
-                "active",
-                tab.dataset.mode === selectedMode,
-              );
+              tab.classList.toggle("active", tab.dataset.mode === selectedMode);
             } else {
               tab.classList.toggle("active", tab.dataset.mode === state.mode);
             }
